@@ -120,13 +120,48 @@ class BaseTranslator(ABC):
     @abstractmethod
     def translate(self, text: str, **kwargs) -> str:
         """
-        translate a text using a translator under the hood and return
-        the translated text
-        @param text: text to translate
-        @param kwargs: additional arguments
-        @return: str
+        function to translate a text
+        @param text: desired text to translate
+        @return: str: translated text
         """
-        return NotImplemented("You need to implement the translate method!")
+        if is_input_valid(text, max_chars=5000):
+            text = text.strip()
+            if self._same_source_target() or is_empty(text):
+                return text
+            self._url_params["tl"] = self._target
+            self._url_params["sl"] = self._source
+
+            if self.payload_key:
+                self._url_params[self.payload_key] = text
+
+            response = requests.get(
+                self._base_url, params=self._url_params, proxies=self.proxies
+            )
+            if response.status_code == 429:
+                raise TooManyRequests()
+
+            if request_failed(status_code=response.status_code):
+                raise RequestError()
+
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            element = soup.find(self._element_tag, self._element_query)
+            response.close()
+
+            if not element:
+                element = soup.find(self._element_tag, self._alt_element_query)
+                if not element:
+                    raise TranslationNotFound(text)
+
+            translated_text = element.get_text(strip=True)
+
+            # Return the translated text if it's different from the input
+            if translated_text != text.strip():
+                return translated_text
+            else:
+                # Handle cases where the translation might be the same as the input
+                logging.warning(f"Translation is the same as input for: {text}")
+                return translated_text  # Or return text.strip() if you prefer
 
     def _read_docx(self, f: str):
         import docx2txt
