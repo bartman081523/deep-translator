@@ -18,7 +18,6 @@ from deep_translator.exceptions import (
 )
 from deep_translator.validate import is_empty, is_input_valid, request_failed
 
-
 class GoogleTranslator(BaseTranslator):
     """
     class that wraps functions, which use Google Translate under the hood to translate text(s)
@@ -41,12 +40,12 @@ class GoogleTranslator(BaseTranslator):
             source=source,
             target=target,
             element_tag="div",
-            element_query={"class": "t0"},
+            # element_query={"class": "t0"},  # Commented out the old query.
             payload_key="q",  # key of text in the url
             **kwargs
         )
 
-        self._alt_element_query = {"class": "result-container"}
+        self._alt_element_query = {"class": "result-container"} # Updated query.
 
     def translate(self, text: str, **kwargs) -> str:
         """
@@ -75,33 +74,17 @@ class GoogleTranslator(BaseTranslator):
 
             soup = BeautifulSoup(response.text, "html.parser")
 
-            element = soup.find(self._element_tag, self._element_query)
+            # Updated element search using the new class.
+            element = soup.find(self._element_tag, self._alt_element_query)
             response.close()
 
             if not element:
-                element = soup.find(self._element_tag, self._alt_element_query)
-                if not element:
-                    raise TranslationNotFound(text)
-            if element.get_text(strip=True) == text.strip():
-                to_translate_alpha = "".join(
-                    ch for ch in text.strip() if ch.isalnum()
-                )
-                translated_alpha = "".join(
-                    ch for ch in element.get_text(strip=True) if ch.isalnum()
-                )
-                if (
-                    to_translate_alpha
-                    and translated_alpha
-                    and to_translate_alpha == translated_alpha
-                ):
-                    self._url_params["tl"] = self._target
-                    if "hl" not in self._url_params:
-                        return text.strip()
-                    del self._url_params["hl"]
-                    return self.translate(text)
+                raise TranslationNotFound(text)
 
-            else:
-                return element.get_text(strip=True)
+            translation = element.get_text(strip=True)
+
+            return translation
+            #return element.get_text(strip=True) # use the new method
 
     def translate_file(self, path: str, **kwargs) -> str:
         """
