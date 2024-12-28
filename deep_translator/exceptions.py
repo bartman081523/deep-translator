@@ -90,19 +90,28 @@ class NotValidLength(BaseError):
 
 class RequestError(Exception):
     """
-    exception thrown if an error occurred during the request call, e.g a connection problem.
+    Exception raised for errors during an HTTP request.
     """
 
-    def __init__(
-        self,
-        message="Request exception can happen due to an api connection error. "
-        "Please check your connection and try again",
-    ):
-        self.message = message
+    def __init__(self, status_code):
+        """
+        Initialize the RequestError.
+
+        Args:
+            status_code (int): The HTTP status code.
+        """
+        self.message = f"Request Error: Status code {status_code}"
+        self.status_code = status_code
+        super().__init__(self.message)
 
     def __str__(self):
-        return self.message
+        """
+        Return a string representation of the exception.
 
+        Returns:
+            str: The error message.
+        """
+        return self.message
 
 class MicrosoftAPIerror(Exception):
     """
