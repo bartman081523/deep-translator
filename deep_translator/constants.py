@@ -29,6 +29,7 @@ BASE_URLS = {
     "LIBRE_FREE": "https://libretranslate.de/",
     "TENENT": "https://tmt.tencentcloudapi.com",
     "BAIDU": "https://fanyi-api.baidu.com/api/trans/vip/translate",
+    "REVERSO": "https://api.reverso.net/translate/v1/translation",
 }
 
 GOOGLE_LANGUAGES_TO_CODES = {

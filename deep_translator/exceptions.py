@@ -206,3 +206,16 @@ class BaiduAPIerror(Exception):
 
     def __str__(self):
         return "{}: {}".format(self.message, self.api_message)
+
+class ReversoTranslateError(Exception):
+    """
+    Exception raised for errors occurring during Reverso translation.
+    """
+
+    def __init__(self):
+        """
+        Initialize the ReversoTranslateError.
+        """
+        super().__init__(
+            "An error has occurred, you probably didn't specify a translation language."
+        )
