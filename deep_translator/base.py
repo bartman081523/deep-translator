@@ -141,7 +141,7 @@ class BaseTranslator(ABC):
                 raise TooManyRequests()
 
             if request_failed(status_code=response.status_code):
-                raise RequestError()
+                raise RequestError(response.status_code)
 
             soup = BeautifulSoup(response.text, "html.parser")
 
